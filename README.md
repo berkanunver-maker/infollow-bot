@@ -42,6 +42,7 @@ Otomatik Instagram takip listesi değişikliklerini takip eden ve Twitter'da pay
 
 - Node.js 18 veya üzeri
 - npm veya yarn
+- Git (pre-commit hooks için)
 
 ### Bağımlılıkları Yükleme
 
@@ -55,6 +56,12 @@ Playwright browser'larını yükleyin:
 npx playwright install chromium
 ```
 
+Pre-commit hooks'u kurun:
+
+```bash
+npm run prepare
+```
+
 ## ⚙️ Konfigürasyon
 
 `.env.example` dosyasını `.env` olarak kopyalayın:
@@ -64,6 +71,8 @@ cp .env.example .env
 ```
 
 `.env` dosyasını düzenleyip gerekli bilgileri girin:
+
+**⚠️ ÖNEMLİ:** Ana Instagram hesabınızı kullanmayın! Test/burner hesap oluşturun.
 
 ```env
 # Instagram Bilgileri
@@ -95,6 +104,20 @@ BROWSER_TIMEOUT=60000
    - API Key & Secret
    - Access Token & Secret
    alın ve `.env` dosyasına ekleyin
+
+## ✅ Konfigürasyonu Doğrulama
+
+Çalıştırmadan önce konfigürasyonunuzu doğrulayın:
+
+```bash
+npm run validate
+```
+
+Bu komut:
+- API anahtarlarını kontrol eder
+- Placeholder değerleri tespit eder
+- Güvenlik ayarlarını doğrular
+- Cron schedule'u kontrol eder
 
 ## 🚀 Kullanım
 

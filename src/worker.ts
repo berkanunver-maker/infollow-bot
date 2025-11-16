@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { FollowTrackerBot } from './bot';
 import { logger } from './utils/logger';
+import { ConfigValidator } from './utils/validator';
 import { config } from './config';
 
 class BotWorker {
@@ -26,6 +27,23 @@ class BotWorker {
 
   start(): void {
     logger.info('=== Follow Tracker Bot Worker Starting ===');
+
+    // Validate configuration before starting
+    logger.info('Validating configuration...');
+    const validation = ConfigValidator.validate(config);
+
+    if (!validation.valid) {
+      logger.error('Configuration validation failed:');
+      validation.errors.forEach((error) => logger.error(`  - ${error}`));
+      process.exit(1);
+    }
+
+    if (validation.errors.length > 0) {
+      logger.warn('Configuration warnings:');
+      validation.errors.forEach((error) => logger.warn(`  - ${error}`));
+    }
+
+    logger.info('Configuration validated successfully');
     logger.info(`Cron schedule: ${config.cron.schedule}`);
     logger.info(`Target account: @${config.instagram.targetUsername}`);
     logger.info('Worker is now running...');
