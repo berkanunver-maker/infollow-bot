@@ -2,6 +2,16 @@
 
 Otomatik Instagram takip listesi değişikliklerini takip eden ve Twitter'da paylaşan tam otomatik bot sistemi.
 
+## 🎯 Kod Bilmiyorum, Sadece AI Kullanıyorum?
+
+**Harika haber!** Bu proje AI ile kolayca yönetilebilir.
+
+📚 **Hemen başlayın:**
+- [AI_GUIDE.md](./AI_GUIDE.md) - AI'a nasıl talimat vereceğinizi öğrenin
+- [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) - Hazır kopyala-yapıştır promptlar
+
+**Örnek:** *"Tweet'leri Türkçe yapmak istiyorum"* → QUICK_REFERENCE.md'de hazır prompt var!
+
 ## ⚠️ ÖNEMLI UYARILAR
 
 **Bu bot Instagram'ın Kullanım Koşullarını ihlal edebilir!**
