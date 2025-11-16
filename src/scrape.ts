@@ -4,7 +4,7 @@
  * Usage: npm run scrape
  */
 
-import { InstagramScraper } from './scrapers/instagram';
+import { InstagramSecureScraper } from './scrapers/instagram-secure';
 import { SnapshotStorage } from './utils/storage';
 import { logger } from './utils/logger';
 import { config } from './config';
@@ -13,7 +13,7 @@ async function main() {
   logger.info('=== Manual Instagram Scraping ===');
   logger.info(`Target: @${config.instagram.targetUsername}`);
 
-  const scraper = new InstagramScraper();
+  const scraper = new InstagramSecureScraper();
   const storage = new SnapshotStorage();
 
   try {

@@ -40,4 +40,16 @@ export const config: BotConfig = {
   logging: {
     level: getEnvVar('LOG_LEVEL', 'info'),
   },
+  proxy: {
+    enabled: getEnvVar('USE_PROXY', 'false') === 'true',
+    server: getEnvVar('PROXY_SERVER', ''),
+    username: getEnvVar('PROXY_USERNAME', ''),
+    password: getEnvVar('PROXY_PASSWORD', ''),
+  },
+  security: {
+    useStealthMode: getEnvVar('USE_STEALTH_MODE', 'true') === 'true',
+    useSessionPersistence: getEnvVar('USE_SESSION_PERSISTENCE', 'true') === 'true',
+    minDelay: parseInt(getEnvVar('MIN_DELAY', '1000'), 10),
+    maxDelay: parseInt(getEnvVar('MAX_DELAY', '3000'), 10),
+  },
 };

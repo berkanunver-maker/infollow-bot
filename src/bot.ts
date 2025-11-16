@@ -1,4 +1,4 @@
-import { InstagramScraper } from './scrapers/instagram';
+import { InstagramSecureScraper } from './scrapers/instagram-secure';
 import { SnapshotStorage } from './utils/storage';
 import { DiffDetector } from './utils/diff';
 import { TwitterClient } from './twitter/client';
@@ -6,13 +6,13 @@ import { logger } from './utils/logger';
 import { config } from './config';
 
 export class FollowTrackerBot {
-  private scraper: InstagramScraper;
+  private scraper: InstagramSecureScraper;
   private storage: SnapshotStorage;
   private diffDetector: DiffDetector;
   private twitterClient: TwitterClient;
 
   constructor() {
-    this.scraper = new InstagramScraper();
+    this.scraper = new InstagramSecureScraper();
     this.storage = new SnapshotStorage();
     this.diffDetector = new DiffDetector();
     this.twitterClient = new TwitterClient();

@@ -2,8 +2,21 @@
 
 Otomatik Instagram takip listesi değişikliklerini takip eden ve Twitter'da paylaşan tam otomatik bot sistemi.
 
+## ⚠️ ÖNEMLI UYARILAR
+
+**Bu bot Instagram'ın Kullanım Koşullarını ihlal edebilir!**
+
+- ❌ Instagram otomatik scraping'i yasaklar
+- ⚠️ Hesabınız geçici veya kalıcı olarak yasaklanabilir
+- 🔒 Ana hesabınızda **ASLA** kullanmayın
+- 📖 Kullanmadan önce [SECURITY.md](./SECURITY.md) dosyasını okuyun
+- 🎓 Yalnızca eğitim amaçlı kullanın
+
+**Kullanım sorumluluğu tamamen size aittir.**
+
 ## 🎯 Özellikler
 
+### Ana Özellikler
 - ✅ **Playwright ile Instagram Scraping**: Instagram'a giriş yapıp takip listesini otomatik olarak scrape eder
 - 📸 **Otomatik Screenshot**: Profil sayfalarından viewport screenshot'ları alır
 - 📊 **JSON Snapshot Sistemi**: Her taramayı JSON formatında kaydeder
@@ -11,6 +24,17 @@ Otomatik Instagram takip listesi değişikliklerini takip eden ve Twitter'da pay
 - 🐦 **Twitter API v2 Entegrasyonu**: Değişiklikleri otomatik olarak Twitter'da medya ekli tweet olarak paylaşır
 - ⏰ **Cron-based Worker**: Periyodik olarak otomatik çalışır
 - 📝 **Detaylı Logging**: Tüm işlemleri loglar ve hata yönetimi yapar
+
+### 🔐 Güvenlik Özellikleri
+- 🥷 **Stealth Mode**: Bot tespitini zorlaştıran teknikler
+  - navigator.webdriver gizleme
+  - Gerçekçi browser fingerprint
+  - Random user-agent rotation
+- 🍪 **Session Persistence**: Tekrarlı login'leri önler, cookie'leri saklar
+- ⏱️ **Rate Limiting**: İnsan benzeri davranış için random delays
+- 🔄 **Retry Logic**: Exponential backoff ile otomatik yeniden deneme
+- 🛡️ **2FA Detection**: İki faktörlü kimlik doğrulama tespiti
+- 🌐 **Proxy Support**: IP rotation için proxy desteği
 
 ## 📦 Kurulum
 

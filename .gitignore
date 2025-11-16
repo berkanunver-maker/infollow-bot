@@ -27,6 +27,10 @@ screenshots/
 data/**/*.json
 snapshots/**/*.json
 
+# Sessions (contains authentication cookies)
+data/sessions/
+*.session.json
+
 # OS files
 .DS_Store
 Thumbs.db

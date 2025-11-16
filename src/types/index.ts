@@ -30,6 +30,20 @@ export interface DiffResult {
   timestamp: number;
 }
 
+export interface ProxyConfig {
+  enabled: boolean;
+  server?: string;
+  username?: string;
+  password?: string;
+}
+
+export interface SecurityConfig {
+  useStealthMode: boolean;
+  useSessionPersistence: boolean;
+  minDelay: number;
+  maxDelay: number;
+}
+
 export interface BotConfig {
   instagram: {
     username: string;
@@ -58,6 +72,8 @@ export interface BotConfig {
   logging: {
     level: string;
   };
+  proxy: ProxyConfig;
+  security: SecurityConfig;
 }
 
 export interface ScraperResult {
