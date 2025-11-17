@@ -42,9 +42,9 @@ export const config: BotConfig = {
   },
   proxy: {
     enabled: getEnvVar('USE_PROXY', 'false') === 'true',
-    server: getEnvVar('PROXY_SERVER', ''),
-    username: getEnvVar('PROXY_USERNAME', ''),
-    password: getEnvVar('PROXY_PASSWORD', ''),
+    server: process.env.PROXY_SERVER || '',
+    username: process.env.PROXY_USERNAME || '',
+    password: process.env.PROXY_PASSWORD || '',
   },
   security: {
     useStealthMode: getEnvVar('USE_STEALTH_MODE', 'true') === 'true',

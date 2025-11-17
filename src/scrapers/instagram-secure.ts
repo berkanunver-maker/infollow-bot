@@ -59,27 +59,27 @@ export class InstagramSecureScraper {
     this.context = await this.browser.newContext(contextOptions);
 
     // Add stealth scripts to hide automation
-    await this.context.addInitScript(() => {
+    await this.context.addInitScript(`
       // Override navigator.webdriver
-      Object.defineProperty(navigator, 'webdriver', {
+      Object.defineProperty(Object.getPrototypeOf(navigator), 'webdriver', {
         get: () => undefined,
       });
 
       // Override plugins
-      Object.defineProperty(navigator, 'plugins', {
+      Object.defineProperty(Object.getPrototypeOf(navigator), 'plugins', {
         get: () => [1, 2, 3, 4, 5],
       });
 
       // Override languages
-      Object.defineProperty(navigator, 'languages', {
+      Object.defineProperty(Object.getPrototypeOf(navigator), 'languages', {
         get: () => ['en-US', 'en'],
       });
 
       // Remove automation hints
-      (window as any).chrome = {
+      window.chrome = {
         runtime: {},
       };
-    });
+    `);
 
     this.page = await this.context.newPage();
     logger.info('Browser initialized with stealth mode');
