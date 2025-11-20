@@ -10,17 +10,22 @@ export class FollowTrackerBot {
   private storage: SnapshotStorage;
   private diffDetector: DiffDetector;
   private twitterClient: TwitterClient;
+  private dryRun: boolean;
 
-  constructor() {
+  constructor(dryRun: boolean = false) {
     this.scraper = new InstagramSecureScraper();
     this.storage = new SnapshotStorage();
     this.diffDetector = new DiffDetector();
-    this.twitterClient = new TwitterClient();
+    this.twitterClient = new TwitterClient(dryRun);
+    this.dryRun = dryRun;
   }
 
   async run(): Promise<void> {
     const startTime = Date.now();
     logger.info('=== Starting Follow Tracker Bot ===');
+    if (this.dryRun) {
+      logger.info('🔍 DRY RUN MODE - No tweets will be posted');
+    }
     logger.info(`Target: @${config.instagram.targetUsername}`);
 
     try {

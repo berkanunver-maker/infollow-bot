@@ -5,6 +5,9 @@ import { config } from './config';
 
 async function main() {
   try {
+    // Check for dry-run flag
+    const dryRun = process.argv.includes('--dry-run') || process.argv.includes('-d');
+
     // Validate configuration before starting
     logger.info('Validating configuration...');
     const validation = ConfigValidator.validate(config);
@@ -22,7 +25,7 @@ async function main() {
 
     logger.info('Configuration validated successfully');
 
-    const bot = new FollowTrackerBot();
+    const bot = new FollowTrackerBot(dryRun);
     await bot.run();
     process.exit(0);
   } catch (error) {

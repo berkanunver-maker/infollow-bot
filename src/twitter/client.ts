@@ -6,8 +6,10 @@ import { DiffResult, TwitterPostResult } from '../types';
 
 export class TwitterClient {
   private client: TwitterApi;
+  private dryRun: boolean;
 
-  constructor() {
+  constructor(dryRun: boolean = false) {
+    this.dryRun = dryRun;
     this.client = new TwitterApi({
       appKey: config.twitter.apiKey,
       appSecret: config.twitter.apiSecret,
@@ -18,6 +20,23 @@ export class TwitterClient {
 
   async postTweet(text: string, mediaPath?: string): Promise<TwitterPostResult> {
     try {
+      // Dry run mode - preview only
+      if (this.dryRun) {
+        logger.info('🔍 DRY RUN - Tweet preview (not posting):');
+        logger.info('─'.repeat(60));
+        logger.info(text);
+        logger.info('─'.repeat(60));
+        if (mediaPath) {
+          logger.info(`📎 Media: ${mediaPath}`);
+        }
+        logger.info(`📏 Length: ${text.length}/280 characters`);
+
+        return {
+          success: true,
+          tweetId: 'dry-run-preview',
+        };
+      }
+
       logger.info('Posting tweet to Twitter...');
 
       let mediaId: string | undefined;
