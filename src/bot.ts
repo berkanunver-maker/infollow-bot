@@ -1,23 +1,39 @@
 import { InstagramSecureScraper } from './scrapers/instagram-secure';
 import { SnapshotStorage } from './utils/storage';
 import { DiffDetector } from './utils/diff';
-import { TwitterClient } from './twitter/client';
 import { logger } from './utils/logger';
 import { config } from './config';
+import { notificationManager } from './notifications/manager';
+import {
+  TwitterProvider,
+  DiscordProvider,
+  EmailProvider,
+  SlackProvider,
+  TelegramProvider,
+} from './notifications/providers';
 
 export class FollowTrackerBot {
   private scraper: InstagramSecureScraper;
   private storage: SnapshotStorage;
   private diffDetector: DiffDetector;
-  private twitterClient: TwitterClient;
   private dryRun: boolean;
 
   constructor(dryRun: boolean = false) {
     this.scraper = new InstagramSecureScraper();
     this.storage = new SnapshotStorage();
     this.diffDetector = new DiffDetector();
-    this.twitterClient = new TwitterClient(dryRun);
     this.dryRun = dryRun;
+
+    // Register all notification providers
+    this.registerNotificationProviders();
+  }
+
+  private registerNotificationProviders() {
+    notificationManager.register(new TwitterProvider(this.dryRun));
+    notificationManager.register(new DiscordProvider());
+    notificationManager.register(new EmailProvider());
+    notificationManager.register(new SlackProvider());
+    notificationManager.register(new TelegramProvider());
   }
 
   async run(): Promise<void> {
@@ -70,9 +86,9 @@ export class FollowTrackerBot {
       const diffSummary = this.diffDetector.formatDiffSummary(diff);
       logger.info('\n' + diffSummary);
 
-      // Post to Twitter if there are changes
+      // Send notifications if there are changes
       if (this.diffDetector.hasChanges(diff)) {
-        logger.info('Changes detected, posting to Twitter...');
+        logger.info('Changes detected, sending notifications...');
 
         // Take screenshot of one of the changed profiles
         let screenshotPath: string | null = null;
@@ -87,24 +103,31 @@ export class FollowTrackerBot {
           );
         }
 
-        // Post to Twitter
-        const twitterResult = await this.twitterClient.postDiffUpdate(
+        // Send to all enabled notification providers
+        const results = await notificationManager.sendToAll({
+          type: 'change',
+          targetUsername: config.instagram.targetUsername,
           diff,
-          config.instagram.targetUsername,
-          screenshotPath || undefined
+          timestamp: Date.now(),
+          screenshotPath: screenshotPath || undefined,
+        });
+
+        // Log results
+        const successCount = results.filter((r) => r.success).length;
+        const failCount = results.filter((r) => !r.success).length;
+
+        logger.info(
+          `Notifications sent: ${successCount} succeeded, ${failCount} failed`
         );
 
-        if (twitterResult.success) {
-          logger.info(
-            `Successfully posted to Twitter: ${twitterResult.tweetId}`
-          );
-        } else {
-          logger.error(
-            `Failed to post to Twitter: ${twitterResult.error}`
-          );
-        }
+        // Log failed providers
+        results
+          .filter((r) => !r.success)
+          .forEach((r) => {
+            logger.error(`${r.provider} failed: ${r.error}`);
+          });
       } else {
-        logger.info('No changes detected, skipping Twitter post');
+        logger.info('No changes detected, skipping notifications');
       }
 
       // Cleanup old snapshots (keep last 10)
