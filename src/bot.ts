@@ -11,17 +11,20 @@ import {
   SlackProvider,
   TelegramProvider,
 } from './notifications/providers';
+import { ExportService } from './services/export';
 
 export class FollowTrackerBot {
   private scraper: InstagramSecureScraper;
   private storage: SnapshotStorage;
   private diffDetector: DiffDetector;
+  private exportService: ExportService;
   private dryRun: boolean;
 
   constructor(dryRun: boolean = false) {
     this.scraper = new InstagramSecureScraper();
     this.storage = new SnapshotStorage();
     this.diffDetector = new DiffDetector();
+    this.exportService = new ExportService();
     this.dryRun = dryRun;
 
     // Register all notification providers
@@ -36,13 +39,15 @@ export class FollowTrackerBot {
     notificationManager.register(new TelegramProvider());
   }
 
-  async run(): Promise<void> {
+  async run(targetUsername?: string): Promise<void> {
     const startTime = Date.now();
+    const target = targetUsername || config.instagram.targetUsername;
+
     logger.info('=== Starting Follow Tracker Bot ===');
     if (this.dryRun) {
       logger.info('🔍 DRY RUN MODE - No tweets will be posted');
     }
-    logger.info(`Target: @${config.instagram.targetUsername}`);
+    logger.info(`Target: @${target}`);
 
     try {
       // Initialize scraper
@@ -52,9 +57,7 @@ export class FollowTrackerBot {
       await this.scraper.login();
 
       // Scrape following list
-      const result = await this.scraper.scrapeFollowing(
-        config.instagram.targetUsername
-      );
+      const result = await this.scraper.scrapeFollowing(target);
 
       if (!result.success || !result.snapshot) {
         throw new Error(result.error || 'Failed to scrape following list');
@@ -65,15 +68,14 @@ export class FollowTrackerBot {
       // Save current snapshot
       this.storage.saveSnapshot(currentSnapshot);
 
+      // Auto-export if enabled
+      await this.exportService.autoExport(currentSnapshot);
+
       // Get previous snapshot
-      const previousSnapshot = this.storage.getLatestSnapshot(
-        config.instagram.targetUsername
-      );
+      const previousSnapshot = this.storage.getLatestSnapshot(target);
 
       // Calculate diff (skip the most recent one we just saved)
-      const allSnapshots = this.storage.getAllSnapshots(
-        config.instagram.targetUsername
-      );
+      const allSnapshots = this.storage.getAllSnapshots(target);
       const previousSnapshotForDiff =
         allSnapshots.length > 1 ? allSnapshots[allSnapshots.length - 2] : null;
 
@@ -106,7 +108,7 @@ export class FollowTrackerBot {
         // Send to all enabled notification providers
         const results = await notificationManager.sendToAll({
           type: 'change',
-          targetUsername: config.instagram.targetUsername,
+          targetUsername: target,
           diff,
           timestamp: Date.now(),
           screenshotPath: screenshotPath || undefined,
@@ -131,7 +133,7 @@ export class FollowTrackerBot {
       }
 
       // Cleanup old snapshots (keep last 10)
-      this.storage.deleteOldSnapshots(config.instagram.targetUsername, 10);
+      this.storage.deleteOldSnapshots(target, 10);
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
       logger.info(`=== Bot completed successfully in ${duration}s ===`);

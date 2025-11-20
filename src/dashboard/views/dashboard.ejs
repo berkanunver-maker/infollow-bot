@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Instagram Follow Tracker</title>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-info {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .logout-btn {
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .stat-change {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .stat-change.positive {
+      color: #27ae60;
+    }
+
+    .stat-change.negative {
+      color: #e74c3c;
+    }
+
+    .stat-change.neutral {
+      color: #95a5a6;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .chart-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .chart-card h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .activity-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      margin-bottom: 30px;
+    }
+
+    .activity-section h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .activity-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .activity-item {
+      padding: 16px;
+      border-left: 4px solid #667eea;
+      background: #f8f9fa;
+      margin-bottom: 12px;
+      border-radius: 4px;
+    }
+
+    .activity-item.positive {
+      border-left-color: #27ae60;
+    }
+
+    .activity-item.negative {
+      border-left-color: #e74c3c;
+    }
+
+    .activity-date {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .activity-details {
+      display: flex;
+      gap: 20px;
+      font-size: 14px;
+    }
+
+    .activity-details span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .config-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .config-section h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .config-group h3 {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .config-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .config-item:last-child {
+      border-bottom: none;
+    }
+
+    .config-label {
+      font-size: 14px;
+      color: #333;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge.enabled {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge.disabled {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .config-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>📊 Follow Tracker Dashboard</h1>
+    </div>
+    <div class="topbar-right">
+      <span class="user-info">Welcome, <%= username %></span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Snapshots</div>
+        <div class="stat-value" id="total-snapshots">-</div>
+        <div class="stat-change neutral">All time</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Current Following</div>
+        <div class="stat-value" id="current-following">-</div>
+        <div class="stat-change" id="following-change">-</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Net Change</div>
+        <div class="stat-value" id="net-change">-</div>
+        <div class="stat-change" id="change-label">Since first snapshot</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Last Updated</div>
+        <div class="stat-value" style="font-size: 18px;" id="last-updated">-</div>
+        <div class="stat-change neutral" id="time-ago">-</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <h2>Following Count Over Time</h2>
+        <canvas id="following-chart"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <h2>Changes Over Time</h2>
+        <canvas id="changes-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="activity-section">
+      <h2>Recent Activity</h2>
+      <div id="activity-list" class="activity-list">
+        <div class="loading">Loading activity...</div>
+      </div>
+    </div>
+
+    <!-- Configuration -->
+    <div class="config-section">
+      <h2>Configuration</h2>
+      <div class="config-grid">
+        <div class="config-group">
+          <h3>Target</h3>
+          <div class="config-item">
+            <span class="config-label">Username</span>
+            <span><%= config.targetUsername %></span>
+          </div>
+          <div class="config-item">
+            <span class="config-label">Schedule</span>
+            <span><%= config.cronSchedule || 'Manual' %></span>
+          </div>
+        </div>
+
+        <div class="config-group">
+          <h3>Notifications</h3>
+          <div class="config-item">
+            <span class="config-label">Twitter</span>
+            <span class="badge <%= config.notifications.twitter ? 'enabled' : 'disabled' %>">
+              <%= config.notifications.twitter ? 'Enabled' : 'Disabled' %>
+            </span>
+          </div>
+          <div class="config-item">
+            <span class="config-label">Discord</span>
+            <span class="badge <%= config.notifications.discord ? 'enabled' : 'disabled' %>">
+              <%= config.notifications.discord ? 'Enabled' : 'Disabled' %>
+            </span>
+          </div>
+          <div class="config-item">
+            <span class="config-label">Email</span>
+            <span class="badge <%= config.notifications.email ? 'enabled' : 'disabled' %>">
+              <%= config.notifications.email ? 'Enabled' : 'Disabled' %>
+            </span>
+          </div>
+          <div class="config-item">
+            <span class="config-label">Slack</span>
+            <span class="badge <%= config.notifications.slack ? 'enabled' : 'disabled' %>">
+              <%= config.notifications.slack ? 'Enabled' : 'Disabled' %>
+            </span>
+          </div>
+          <div class="config-item">
+            <span class="config-label">Telegram</span>
+            <span class="badge <%= config.notifications.telegram ? 'enabled' : 'disabled' %>">
+              <%= config.notifications.telegram ? 'Enabled' : 'Disabled' %>
+            </span>
+          </div>
+        </div>
+
+        <div class="config-group">
+          <h3>Export</h3>
+          <div class="config-item">
+            <span class="config-label">CSV Export</span>
+            <span class="badge <%= config.export.csv ? 'enabled' : 'disabled' %>">
+              <%= config.export.csv ? 'Enabled' : 'Disabled' %>
+            </span>
+          </div>
+          <div class="config-item">
+            <span class="config-label">Excel Export</span>
+            <span class="badge <%= config.export.excel ? 'enabled' : 'disabled' %>">
+              <%= config.export.excel ? 'Enabled' : 'Disabled' %>
+            </span>
+          </div>
+          <div class="config-item">
+            <span class="config-label">Multi-Account</span>
+            <span class="badge <%= config.multiAccount ? 'enabled' : 'disabled' %>">
+              <%= config.multiAccount ? 'Enabled' : 'Disabled' %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sessionId = localStorage.getItem('sessionId');
+    const socket = io({
+      extraHeaders: {
+        'x-session-id': sessionId
+      }
+    });
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('sessionId');
+      window.location.href = '/login';
+    }
+
+    // Fetch and display stats
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/stats', {
+          headers: {
+            'x-session-id': sessionId
+          }
+        });
+        const data = await response.json();
+
+        if (data.success && data.stats) {
+          const stats = data.stats;
+
+          document.getElementById('total-snapshots').textContent = stats.totalSnapshots;
+          document.getElementById('current-following').textContent = stats.currentFollowing || '-';
+
+          const netChange = stats.netChange || 0;
+          const netChangeEl = document.getElementById('net-change');
+          netChangeEl.textContent = netChange >= 0 ? `+${netChange}` : netChange;
+          netChangeEl.className = 'stat-value ' + (netChange > 0 ? 'positive' : netChange < 0 ? 'negative' : 'neutral');
+
+          const followingChangeEl = document.getElementById('following-change');
+          followingChangeEl.textContent = `${stats.initialFollowing || 0} → ${stats.currentFollowing || 0}`;
+          followingChangeEl.className = 'stat-change ' + (netChange > 0 ? 'positive' : netChange < 0 ? 'negative' : 'neutral');
+
+          if (stats.latestSnapshot) {
+            const date = new Date(stats.latestSnapshot);
+            document.getElementById('last-updated').textContent = date.toLocaleString();
+            document.getElementById('time-ago').textContent = timeAgo(date);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
+    }
+
+    // Load snapshots for chart
+    async function loadSnapshotsChart() {
+      try {
+        const response = await fetch('/api/snapshots', {
+          headers: {
+            'x-session-id': sessionId
+          }
+        });
+        const data = await response.json();
+
+        if (data.success && data.snapshots) {
+          const labels = data.snapshots.map(s => new Date(s.date).toLocaleDateString());
+          const counts = data.snapshots.map(s => s.followingCount);
+
+          const ctx = document.getElementById('following-chart').getContext('2d');
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Following Count',
+                data: counts,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4,
+                fill: true
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: false
+                }
+              }
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load snapshots:', error);
+      }
+    }
+
+    // Load activity for chart
+    async function loadActivityChart() {
+      try {
+        const response = await fetch('/api/activity', {
+          headers: {
+            'x-session-id': sessionId
+          }
+        });
+        const data = await response.json();
+
+        if (data.success && data.activity) {
+          const labels = data.activity.map(a => new Date(a.date).toLocaleDateString());
+          const newFollows = data.activity.map(a => a.newFollows);
+          const unfollows = data.activity.map(a => a.unfollows);
+
+          const ctx = document.getElementById('changes-chart').getContext('2d');
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: 'New Follows',
+                  data: newFollows,
+                  backgroundColor: 'rgba(39, 174, 96, 0.7)',
+                },
+                {
+                  label: 'Unfollows',
+                  data: unfollows,
+                  backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'top'
+                }
+              }
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load activity:', error);
+      }
+    }
+
+    // Load activity list
+    async function loadActivity() {
+      try {
+        const response = await fetch('/api/activity', {
+          headers: {
+            'x-session-id': sessionId
+          }
+        });
+        const data = await response.json();
+
+        const container = document.getElementById('activity-list');
+
+        if (data.success && data.activity && data.activity.length > 0) {
+          container.innerHTML = data.activity.slice(0, 10).map(item => {
+            const itemClass = item.netChange > 0 ? 'positive' : item.netChange < 0 ? 'negative' : '';
+            return `
+              <div class="activity-item ${itemClass}">
+                <div class="activity-date">${new Date(item.date).toLocaleString()}</div>
+                <div class="activity-details">
+                  <span>✅ New: ${item.newFollows}</span>
+                  <span>❌ Unfollows: ${item.unfollows}</span>
+                  <span>📊 Net: ${item.netChange >= 0 ? '+' : ''}${item.netChange}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📊</div>
+              <div>No activity recorded yet</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Failed to load activity:', error);
+        document.getElementById('activity-list').innerHTML = '<div class="empty-state">Failed to load activity</div>';
+      }
+    }
+
+    // Time ago helper
+    function timeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      const intervals = {
+        year: 31536000,
+        month: 2592000,
+        week: 604800,
+        day: 86400,
+        hour: 3600,
+        minute: 60
+      };
+
+      for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+        const interval = Math.floor(seconds / secondsInUnit);
+        if (interval >= 1) {
+          return `${interval} ${unit}${interval !== 1 ? 's' : ''} ago`;
+        }
+      }
+      return 'Just now';
+    }
+
+    // Load all data on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStats();
+      loadSnapshotsChart();
+      loadActivityChart();
+      loadActivity();
+
+      // Subscribe to real-time updates
+      socket.emit('subscribe', '<%= config.targetUsername %>');
+
+      // Handle real-time updates
+      socket.on('update', (event) => {
+        console.log('Real-time update:', event);
+        // Reload data
+        loadStats();
+        loadSnapshotsChart();
+        loadActivityChart();
+        loadActivity();
+      });
+    });
+  </script>
+</body>
+</html>

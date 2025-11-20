@@ -1,0 +1,44 @@
+[
+  {
+    "username": "cristiano",
+    "notifications": {
+      "twitter": true,
+      "discord": true,
+      "email": false,
+      "slack": false,
+      "telegram": false
+    },
+    "export": {
+      "csv": true,
+      "excel": false
+    }
+  },
+  {
+    "username": "leomessi",
+    "notifications": {
+      "twitter": true,
+      "discord": false,
+      "email": true,
+      "slack": false,
+      "telegram": false
+    },
+    "export": {
+      "csv": false,
+      "excel": true
+    }
+  },
+  {
+    "username": "therock",
+    "notifications": {
+      "twitter": false,
+      "discord": true,
+      "email": false,
+      "slack": true,
+      "telegram": true
+    },
+    "export": {
+      "csv": true,
+      "excel": true
+    }
+  }
+]
