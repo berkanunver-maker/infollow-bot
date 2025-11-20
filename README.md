@@ -46,6 +46,53 @@ Otomatik Instagram takip listesi değişikliklerini takip eden ve Twitter'da pay
 - 🛡️ **2FA Detection**: İki faktörlü kimlik doğrulama tespiti
 - 🌐 **Proxy Support**: IP rotation için proxy desteği
 
+### 🚀 Phase 2 Özellikleri (Yeni!)
+
+#### 📢 Çok Kanallı Bildirim Sistemi
+Tüm bildirim kanalları **opsiyonel** ve `.env` dosyası ile kontrol edilebilir:
+- 🐦 **Twitter/X** - Medya ekli tweet'ler
+- 💬 **Discord** - Webhook ile zengin embed mesajları ve dosya ekleri
+- 📧 **Email** - Gmail/Outlook/SMTP desteği, HTML şablonları
+- 💼 **Slack** - Webhook ile Block Kit formatlı mesajlar
+- 📱 **Telegram** - Bot API ile markdown formatlı mesajlar
+
+**Özellikler:**
+- Her kanal bağımsız olarak aktif/deaktif edilebilir
+- Graceful degradation (bir kanal hata verse diğerleri çalışmaya devam eder)
+- Paralel bildirim gönderimi
+
+#### 📊 Export Sistemi
+- 📄 **CSV Export**: Tüm snapshot verilerini CSV formatında dışa aktarma
+- 📈 **Excel Export**: Styled Excel dosyaları (renkli başlıklar, özet sayfası)
+- 🔄 **Otomatik Export**: Her snapshot sonrası otomatik dışa aktarma
+- 🎯 **Özelleştirilebilir**: Tarih filtresi, format seçimi, output dizini
+
+#### 👥 Çok Hesap Desteği
+Birden fazla Instagram hesabını aynı anda takip edin:
+- 📝 `targets.json` ile birden fazla hedef hesap tanımlama
+- ⚡ **Paralel** veya **Sıralı** işleme modu
+- 🎛️ **Hesap Bazlı Ayarlar**: Her hesap için özel bildirim ve export ayarları
+- ⏱️ Hesaplar arası gecikme ayarı
+
+#### 🖥️ Profesyonel Web Dashboard
+Modern ve kullanıcı dostu web arayüzü:
+- 🔐 **Kimlik Doğrulama**: Güvenli login sistemi
+- 📊 **Gerçek Zamanlı İstatistikler**: Anlık veri görüntüleme
+- 📈 **İnteraktif Grafikler**: Chart.js ile following ve değişiklik grafikleri
+- 🔔 **Canlı Aktivite Akışı**: Gerçek zamanlı değişiklik bildirimleri
+- ⚙️ **Yapılandırma Görüntüleyici**: Tüm ayarları tek bakışta görme
+- 📱 **Responsive Tasarım**: Mobil uyumlu modern arayüz
+- ⚡ **Socket.io**: Gerçek zamanlı güncellemeler
+
+#### 💬 Telegram Bot CLI
+Telegram üzerinden bot kontrolü:
+- `/start` - Bot'u başlat ve karşılama mesajı
+- `/help` - Yardım menüsü
+- `/status` - Bot durumu ve yapılandırma
+- `/stats` - Detaylı istatistikler
+- `/latest` - Son değişiklikleri görüntüle
+- `/snapshot` - Son snapshot detayları
+
 ## 📦 Kurulum
 
 ### Gereksinimler
@@ -147,6 +194,16 @@ npm start
 npm run dev
 ```
 
+### Dry Run Modu
+
+Test etmek için (bildirim göndermeden):
+
+```bash
+npm start -- --dry-run
+# veya
+npm run dev -- -d
+```
+
 ### Cron Worker Modunda Çalıştırma
 
 Bot'u periyodik olarak otomatik çalıştırmak için:
@@ -159,6 +216,97 @@ Worker modu:
 - Başlangıçta hemen bir kez çalışır
 - Ardından belirlediğiniz cron schedule'a göre periyodik olarak çalışır
 - Sürekli çalışır durumda kalır (arka planda)
+
+### 🎛️ Phase 2 CLI Komutları
+
+#### Yardım ve Durum
+
+```bash
+# Yardım menüsü
+npm run help
+
+# Bot durumu
+npm run status
+
+# İstatistikler
+npm run stats
+```
+
+#### Kurulum Sihirbazı
+
+İnteraktif kurulum sihirbazı ile kolayca yapılandırma:
+
+```bash
+npm run setup
+```
+
+Sihirbaz size şunları soracak:
+- Instagram hesap bilgileri
+- Twitter API anahtarları
+- Hedef Instagram kullanıcısı
+- Bildirim kanalları (Discord, Email, Slack, Telegram)
+- Export tercihleri
+- Dashboard ayarları
+
+#### Export Komutları
+
+```bash
+# Tüm snapshot'ları CSV'ye aktar
+npm run export
+
+# Excel formatında
+npm run export -- --format xlsx
+
+# Son 7 günü aktar
+npm run export -- --days 7
+
+# Belirli bir kullanıcı için
+npm run export -- --user cristiano
+
+# Özel çıktı dosyası
+npm run export -- --output ./my-exports/data.csv
+
+# Komple örnek
+npm run export -- --format xlsx --days 30 --user leomessi --output ./reports/
+```
+
+#### Web Dashboard
+
+Dashboard'u başlatın:
+
+```bash
+npm run dashboard
+```
+
+Ardından tarayıcınızda açın:
+- URL: `http://localhost:3000` (veya `.env`'de ayarladığınız port)
+- Kullanıcı adı: `.env` dosyasındaki `DASHBOARD_USERNAME`
+- Şifre: `.env` dosyasındaki `DASHBOARD_PASSWORD`
+
+Dashboard özellikleri:
+- Gerçek zamanlı istatistikler
+- İnteraktif grafikler
+- Aktivite akışı
+- Yapılandırma görüntüleme
+- Responsive tasarım
+
+#### Telegram Bot CLI
+
+Telegram bot'u başlatın:
+
+```bash
+npm run telegram
+```
+
+Telegram'da bot'unuza gidin ve komutları kullanın:
+- `/start` - Karşılama mesajı
+- `/help` - Yardım
+- `/status` - Bot durumu
+- `/stats` - İstatistikler
+- `/latest` - Son değişiklikler
+- `/snapshot` - Son snapshot
+
+**Not:** `.env` dosyasında `TELEGRAM_BOT_TOKEN` ve `TELEGRAM_CHAT_ID` ayarlanmış olmalı.
 
 ### Production'da Çalıştırma
 
@@ -201,26 +349,55 @@ docker run -d --name infollow-bot --env-file .env infollow-bot
 ```
 infollow-bot/
 ├── src/
-│   ├── bot.ts                 # Ana bot orchestrator
-│   ├── worker.ts              # Cron worker
-│   ├── index.ts               # Entry point (tek seferlik)
-│   ├── config.ts              # Konfigürasyon yönetimi
+│   ├── bot.ts                      # Ana bot orchestrator
+│   ├── worker.ts                   # Cron worker
+│   ├── index.ts                    # Entry point (tek seferlik)
+│   ├── config.ts                   # Konfigürasyon yönetimi
 │   ├── types/
-│   │   └── index.ts           # TypeScript type definitions
+│   │   ├── index.ts                # TypeScript type definitions
+│   │   └── notifications.ts        # Notification type definitions
 │   ├── scrapers/
-│   │   └── instagram.ts       # Instagram scraper (Playwright)
+│   │   └── instagram-secure.ts     # Instagram scraper (Playwright)
 │   ├── twitter/
-│   │   └── client.ts          # Twitter API v2 client
+│   │   └── client.ts               # Twitter API v2 client
+│   ├── notifications/              # 🆕 Bildirim sistemi
+│   │   ├── manager.ts              # Notification orchestrator
+│   │   └── providers/              # Notification providers
+│   │       ├── twitter.ts          # Twitter provider
+│   │       ├── discord.ts          # Discord webhook
+│   │       ├── email.ts            # Email (Gmail/Outlook/SMTP)
+│   │       ├── slack.ts            # Slack webhook
+│   │       └── telegram.ts         # Telegram bot
+│   ├── services/                   # 🆕 Servisler
+│   │   ├── export.ts               # CSV/Excel export
+│   │   ├── multi-account.ts        # Multi-account manager
+│   │   └── multi-account-runner.ts # Multi-account runner
+│   ├── dashboard/                  # 🆕 Web Dashboard
+│   │   ├── server.ts               # Express server
+│   │   └── views/                  # EJS templates
+│   │       ├── login.ejs           # Login sayfası
+│   │       └── dashboard.ejs       # Dashboard UI
+│   ├── cli/                        # CLI komutları
+│   │   ├── help.ts                 # Yardım menüsü
+│   │   ├── status.ts               # Durum kontrolü
+│   │   ├── stats.ts                # İstatistikler
+│   │   ├── setup.ts                # Kurulum sihirbazı
+│   │   ├── export.ts               # 🆕 Export CLI
+│   │   └── telegram.ts             # 🆕 Telegram bot CLI
 │   └── utils/
-│       ├── logger.ts          # Winston logger
-│       ├── storage.ts         # JSON snapshot storage
-│       └── diff.ts            # Diff detection
+│       ├── logger.ts               # Winston logger
+│       ├── storage.ts              # JSON snapshot storage
+│       ├── diff.ts                 # Diff detection
+│       └── validator.ts            # Config validator
 ├── data/
-│   ├── snapshots/             # JSON snapshots
-│   └── screenshots/           # Profile screenshots
-├── logs/                      # Log dosyaları
-├── .env                       # Environment variables
-├── .env.example               # Environment variables template
+│   ├── snapshots/                  # JSON snapshots
+│   ├── screenshots/                # Profile screenshots
+│   └── sessions/                   # Browser sessions
+├── exports/                        # 🆕 Exported files (CSV/Excel)
+├── logs/                           # Log dosyaları
+├── .env                            # Environment variables
+├── .env.example                    # Environment variables template
+├── targets.json.example            # 🆕 Multi-account config örneği
 ├── package.json
 ├── tsconfig.json
 └── README.md
